@@ -62,6 +62,8 @@ DATED_TOOLS = [
     tools.get_indicators,
     tools.get_macro_indicators,
     tools.get_verified_market_snapshot,
+    tools.get_economic_calendar,
+    tools.get_crypto_market_data,
 ]
 
 
@@ -75,6 +77,7 @@ INSTRUMENT_TOOLS = [
     tools.get_stock_data, tools.get_indicators, tools.get_verified_market_snapshot,
     tools.get_fundamentals, tools.get_balance_sheet, tools.get_cashflow,
     tools.get_income_statement, tools.get_news, tools.get_insider_transactions,
+    tools.get_crypto_market_data,
 ]
 
 

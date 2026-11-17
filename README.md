@@ -175,6 +175,7 @@ export MOONSHOT_API_KEY=...        # Kimi (Moonshot)
 export GROQ_API_KEY=...            # Groq
 export NVIDIA_API_KEY=...          # NVIDIA NIM
 export FRED_API_KEY=...            # FRED macro data (free, optional)
+export COINGECKO_API_KEY=...       # CoinGecko crypto data (free Demo key, optional)
 export ALPHA_VANTAGE_API_KEY=...   # Alpha Vantage
 export TYPESAFE_API_KEY=...        # Jev social-post screening (optional)
 ```
@@ -292,6 +293,20 @@ config["deep_think_llm"] = "claude-opus-5-5"
 A tier on its own provider uses that provider's key and default endpoint; set `quick_think_backend_url` or `deep_think_backend_url` for a local or relay endpoint. The `TRADINGAGENTS_DEEP_THINK_PROVIDER` and `TRADINGAGENTS_QUICK_THINK_PROVIDER` variables set them for the CLI, together with the tier's model variable.
 
 See `tradingagents/default_config.py` for all configuration options.
+
+### Data sources
+
+Each kind of data comes from the vendors named for it in `data_vendors` (or per tool in `tool_vendors`), tried in the order listed; a vendor you did not list is never used. Two of them need no key and serve as of the run date like the rest:
+
+**Economic calendar (ForexFactory).** The News Analyst lists the scheduled macro releases in the days ahead (central-bank decisions, CPI, payrolls, PMIs) with their impact rating, consensus forecast and previous reading, from ForexFactory's free weekly JSON export. The export covers the current week only and keeps no archive, so a run dated outside this week is told the calendar is unavailable rather than shown an empty week, and a result released after the run date is never shown.
+
+**Crypto market data (CoinGecko).** For a crypto pair such as `BTC-USD` or `ETH-USD`, the Market Analyst reads the USD price, 24-hour and 7-day change, market capitalisation and 24-hour volume from CoinGecko's free API, using only observations made by the end of the run date. CoinGecko can also serve daily crypto prices when Yahoo cannot; list it after Yahoo:
+
+```python
+config["data_vendors"]["core_stock_apis"] = "yfinance,coingecko"
+```
+
+Stocks are unaffected, since CoinGecko answers only for crypto pairs, and Yahoo stays the default. Set `COINGECKO_API_KEY` to a free Demo key for a higher rate limit. CoinGecko's free tier serves about the past year of history; an older window is reported as unavailable.
 
 ### Fundamentals as filed
 

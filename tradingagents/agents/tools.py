@@ -289,3 +289,63 @@ def get_prediction_markets(
         str: A formatted markdown report of matching prediction markets
     """
     return route_to_vendor("get_prediction_markets", topic, limit, trade_date or None)
+
+
+@tool
+def get_economic_calendar(
+    curr_date: Annotated[str, "Current date in yyyy-mm-dd format; the calendar starts on this day"],
+    look_ahead_days: Annotated[
+        int | None, "Days ahead of curr_date to list; omit for 7 (at most 14)"
+    ] = None,
+    min_impact: Annotated[
+        str | None,
+        "Lowest impact level to list: 'high', 'medium', 'low' or 'all'; omit for 'medium'",
+    ] = None,
+    currencies: Annotated[
+        str | None,
+        "Comma-separated currency codes the events move, e.g. 'USD' or 'USD,EUR'; omit for all",
+    ] = None,
+    trade_date: Annotated[str, InjectedState("trade_date")] = "",
+) -> str:
+    """
+    Retrieve the economic calendar from ForexFactory: scheduled macro releases
+    (central-bank decisions, CPI, payrolls, PMIs, GDP) from curr_date through
+    the days ahead, with each event's currency, impact level, consensus
+    forecast and previous reading. The free feed covers the current week only;
+    for any other date it reports the calendar as unavailable. Uses the
+    configured economic_calendar vendor.
+
+    Args:
+        curr_date (str): Current date in yyyy-mm-dd format
+        look_ahead_days (int): Days ahead to list; omit for 7
+        min_impact (str): 'high', 'medium', 'low' or 'all'; omit for 'medium'
+        currencies (str): Comma-separated currency codes; omit for all
+
+    Returns:
+        str: A markdown table of scheduled events, times in UTC
+    """
+    return route_to_vendor(
+        "get_economic_calendar", as_of(curr_date, trade_date), look_ahead_days, min_impact, currencies
+    )
+
+
+@tool
+def get_crypto_market_data(
+    symbol: Annotated[str, InjectedState("company_of_interest")],
+    curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
+    trade_date: Annotated[str, InjectedState("trade_date")] = "",
+) -> str:
+    """
+    Retrieve a market snapshot for the crypto asset under analysis (e.g.
+    BTC-USD) from CoinGecko: USD price, 24-hour and 7-day change, market
+    capitalisation and 24-hour trading volume, from observations made by the
+    end of curr_date. Crypto assets only: for any other instrument it says so
+    and returns no data. Uses the configured crypto_data vendor.
+
+    Args:
+        curr_date (str): Current date in yyyy-mm-dd format
+
+    Returns:
+        str: A formatted markdown snapshot of the crypto market data
+    """
+    return route_to_vendor("get_crypto_market_data", symbol, as_of(curr_date, trade_date))
