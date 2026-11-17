@@ -17,6 +17,13 @@ from tradingagents.dataflows.vendors.alpha_vantage import (
     get_news as get_alpha_vantage_news,
     get_stock as get_alpha_vantage_stock,
 )
+from tradingagents.dataflows.vendors.coingecko import (
+    get_crypto_market_data as get_coingecko_market_data,
+    get_crypto_prices as get_coingecko_prices,
+)
+from tradingagents.dataflows.vendors.forexfactory import (
+    get_economic_calendar as get_forexfactory_economic_calendar,
+)
 from tradingagents.dataflows.vendors.fred import get_macro_data as get_fred_macro_data
 from tradingagents.dataflows.vendors.polymarket import (
     get_prediction_markets as get_polymarket_prediction_markets,
@@ -83,15 +90,27 @@ TOOLS_CATEGORIES = {
         "tools": [
             "get_prediction_markets",
         ]
-    }
+    },
+    "economic_calendar": {
+        "description": "Scheduled macro releases (central banks, CPI, payrolls, PMIs)",
+        "tools": [
+            "get_economic_calendar",
+        ]
+    },
+    "crypto_data": {
+        "description": "Crypto market snapshot (price, change, market cap, volume)",
+        "tools": [
+            "get_crypto_market_data",
+        ]
+    },
 }
 
 # Optional enrichment categories. These add macro/event context to the news
-# analyst but are not core to a decision, so a vendor failure here degrades to a
+# analyst, and crypto market context to the market analyst, but are not core to a decision, so a vendor failure here degrades to a
 # sentinel instead of aborting the run (a bad LLM-supplied indicator, a missing
 # key, or a network blip should not crash an analysis over flavour data). Core
 # categories (prices, fundamentals, news) still raise so a broken primary is loud.
-OPTIONAL_CATEGORIES = {"macro_data", "prediction_markets"}
+OPTIONAL_CATEGORIES = {"macro_data", "prediction_markets", "economic_calendar", "crypto_data"}
 
 # Mapping of methods to their vendor-specific implementations
 VENDOR_METHODS = {
@@ -99,6 +118,8 @@ VENDOR_METHODS = {
     "get_stock_data": {
         "alpha_vantage": get_alpha_vantage_stock,
         "yfinance": get_YFin_data_online,
+        # Crypto pairs only; anything else is "no data" here, so the chain moves on.
+        "coingecko": get_coingecko_prices,
     },
     # technical_indicators
     "get_indicators": {
@@ -145,6 +166,14 @@ VENDOR_METHODS = {
     # prediction_markets
     "get_prediction_markets": {
         "polymarket": get_polymarket_prediction_markets,
+    },
+    # economic_calendar
+    "get_economic_calendar": {
+        "forexfactory": get_forexfactory_economic_calendar,
+    },
+    # crypto_data
+    "get_crypto_market_data": {
+        "coingecko": get_coingecko_market_data,
     },
 }
 

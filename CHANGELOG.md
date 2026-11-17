@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Changes that need action when upgrading are listed under "Upgrading from" in their release.
 
+## [Unreleased]
+
+### Added
+
+- **Economic calendar.** The News Analyst reads the scheduled macro releases in the days ahead (central-bank decisions, CPI, payrolls, PMIs) from ForexFactory's free calendar export, with each event's impact, consensus forecast and previous reading, through `get_economic_calendar`. The export covers the current week only, so a run dated outside it is told the calendar is unavailable, and a result released after the run date is never shown. No key is needed; `data_vendors["economic_calendar"]` names the vendor.
+- **Crypto market data from CoinGecko.** For a crypto pair such as `BTC-USD`, the Market Analyst reads its market capitalisation, 24-hour volume and 24-hour and 7-day change as of the run date through `get_crypto_market_data`. CoinGecko also serves daily crypto prices: `data_vendors["core_stock_apis"] = "yfinance,coingecko"` falls back to it when Yahoo cannot serve a crypto pair, and Yahoo stays the default. No key is needed; set `COINGECKO_API_KEY` to a free Demo key for a higher rate limit.
+
 ## [0.7.1] — 2026-10-27
 
 Decisions are scored only on final closes and settle across long market holidays, a model's unpadded date no longer reads filings made after the run date, and fixes to portfolios, prices, SEC statements, reports, Azure and Claude settings.

@@ -2,13 +2,27 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from tradingagents.agents.analysts.turn import take_turn
 from tradingagents.agents.context import get_instrument_context_from_state, get_language_instruction
-from tradingagents.agents.tools import get_indicators, get_stock_data, get_verified_market_snapshot
+from tradingagents.agents.tools import (
+    get_crypto_market_data,
+    get_indicators,
+    get_stock_data,
+    get_verified_market_snapshot,
+)
 
 # The tools this analyst is offered; its tool node is built from the same tuple.
+# get_crypto_market_data serves crypto assets only, and the brief names it only
+# on a crypto run.
 TOOLS = (
     get_stock_data,
     get_indicators,
     get_verified_market_snapshot,
+    get_crypto_market_data,
+)
+
+CRYPTO_BRIEF = (
+    " This is a crypto asset: also call get_crypto_market_data(curr_date) for its market"
+    " capitalisation, 24-hour trading volume and 24-hour and 7-day change from CoinGecko,"
+    " and use them for liquidity and size context."
 )
 
 
@@ -17,6 +31,7 @@ def create_market_analyst(llm):
     def market_analyst_node(state):
         current_date = state["trade_date"]
         instrument_context = get_instrument_context_from_state(state)
+        crypto_brief = CRYPTO_BRIEF if state.get("asset_type", "stock") == "crypto" else ""
 
         system_message = (
             """You are a trading assistant tasked with analyzing financial markets. Your role is to select the **most relevant indicators** for a given market condition or trading strategy from the following list. The goal is to choose up to **8 indicators** that provide complementary insights without redundancy. Categories and each category's indicators are:
@@ -48,6 +63,7 @@ Volume-Based Indicators:
 Before writing the final report, call get_verified_market_snapshot for this ticker and the current date, and treat it as the source of truth for any exact OHLCV, price-level, or indicator-value claim. If another tool's output conflicts with the verified snapshot, flag the discrepancy rather than inventing a reconciled number. Do not claim historical validation, support/resistance bounces, or exact percentage moves unless they are directly supported by tool output with concrete dates and prices.
 
 Write a very detailed and nuanced report of the trends you observe. Provide specific, actionable insights with supporting evidence to help traders make informed decisions."""
+            + crypto_brief
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
             + get_language_instruction()
         )

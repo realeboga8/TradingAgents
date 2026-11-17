@@ -156,7 +156,8 @@ def build_default_config() -> dict:
         # routed to vendors you didn't choose. For ordered fallback, list several,
         # e.g. "yfinance,alpha_vantage". "default" uses all available vendors.
         "data_vendors": {
-            "core_stock_apis": "yfinance",       # Options: alpha_vantage, yfinance
+            # coingecko serves crypto pairs only: "yfinance,coingecko" falls back to it.
+            "core_stock_apis": "yfinance",       # Options: alpha_vantage, yfinance, coingecko
             "technical_indicators": "yfinance",  # Options: alpha_vantage, yfinance
             # Statements come from SEC EDGAR as filed (US filers), then Yahoo; the
         # overview and insider tools, which SEC EDGAR does not serve, from Yahoo.
@@ -164,6 +165,8 @@ def build_default_config() -> dict:
             "news_data": "yfinance",             # Options: alpha_vantage, yfinance
             "macro_data": "fred",                # Options: fred (needs FRED_API_KEY)
             "prediction_markets": "polymarket",  # Options: polymarket (keyless)
+            "economic_calendar": "forexfactory",  # Options: forexfactory (keyless, current week only)
+            "crypto_data": "coingecko",          # Options: coingecko (keyless; COINGECKO_API_KEY optional)
         },
         # Tool-level configuration (takes precedence over category-level)
         "tool_vendors": {

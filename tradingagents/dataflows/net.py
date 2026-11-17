@@ -3,7 +3,8 @@
 import requests
 
 
-def get_scrubbed(url: str, *, params: dict, timeout: float, secret: str, passthrough=()):
+def get_scrubbed(url: str, *, params: dict, timeout: float, secret: str, passthrough=(),
+                 headers: dict | None = None):
     """``requests.get`` plus ``raise_for_status``, with ``secret`` kept out of errors.
 
     Vendors that authenticate with a query parameter put the key in the URL, and
@@ -12,10 +13,11 @@ def get_scrubbed(url: str, *, params: dict, timeout: float, secret: str, passthr
     error is re-raised as the same class with the key replaced and nothing
     attached: no request or response (both hold the URL) and no exception chain,
     which is why this raises after the ``except`` block rather than inside it.
-    Statuses in ``passthrough`` are returned for the caller to handle.
+    Statuses in ``passthrough`` are returned for the caller to handle. ``headers``
+    go with the request as given, for a vendor that sends its key in a header.
     """
     try:
-        response = requests.get(url, params=params, timeout=timeout)
+        response = requests.get(url, params=params, timeout=timeout, headers=headers)
         if response.status_code not in passthrough:
             response.raise_for_status()
         return response
